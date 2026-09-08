@@ -43,12 +43,32 @@ document.addEventListener('DOMContentLoaded', () => {
   closeMobile.addEventListener('click', () => mobileNav.classList.remove('open'));
   mobileNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileNav.classList.remove('open')));
 
-  // ============ INFINITE CAROUSEL ============
+  // ============ SCROLL-TRIGGERED SECTION REVEALS ============
+  const revealEls = document.querySelectorAll('.section-head, .fabric-hero, .found-card');
+  if (revealEls.length) {
+    if ('IntersectionObserver' in window) {
+      const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+      revealEls.forEach(el => revealObserver.observe(el));
+    } else {
+      // Fallback for browsers without IntersectionObserver support
+      revealEls.forEach(el => el.classList.add('in-view'));
+    }
+  }
+
+  // ============ INFINITE CAROUSEL (only on pages that have it) ============
   const track = document.getElementById('carouselTrack');
   const prevArrow = document.getElementById('prevArrow');
   const nextArrow = document.getElementById('nextArrow');
   const dotsWrap = document.getElementById('dots');
 
+  if (track && prevArrow && nextArrow && dotsWrap) {
   const originals = Array.from(track.children);
   const N = originals.length;
 
@@ -161,6 +181,10 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.addEventListener('click', () => {
         cartCount++;
         cartBadge.textContent = cartCount;
+        // Tactile "bump" feedback — restart the animation even on rapid repeat clicks
+        cartBadge.classList.remove('bump');
+        void cartBadge.offsetWidth; // force reflow so the animation can retrigger
+        cartBadge.classList.add('bump');
         const original = btn.textContent;
         btn.textContent = 'Added';
         setTimeout(() => { btn.textContent = original; }, 1200);
@@ -180,34 +204,45 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   qaClose.addEventListener('click', () => quickAdd.classList.remove('open'));
+  } // end infinite carousel + quick add (index.html only)
 
-  // ============ FABRIC POETRY CONTINUE READING ============
+  // ============ FABRIC POETRY — SMOOTH ACCORDION EXPANSION (index.html only) ============
   const continueReading = document.getElementById('continueReading');
-  continueReading.addEventListener('click', (e) => {
-    e.preventDefault();
-    const p = e.currentTarget.previousElementSibling;
-    if (p.dataset.expanded === 'true') return;
-    p.textContent += " Every garment is pre-washed by hand and left to rest before it ever reaches a hanger, so the drape you feel in the store is the drape you'll wear for years.";
-    p.dataset.expanded = 'true';
-    e.currentTarget.style.opacity = '0.5';
-    e.currentTarget.style.pointerEvents = 'none';
-  });
+  const fabricMore = document.getElementById('fabricMore');
+  if (continueReading && fabricMore) {
+    const contLabel = continueReading.querySelector('.cont-label');
+    continueReading.addEventListener('click', (e) => {
+      e.preventDefault();
+      const expanded = fabricMore.classList.toggle('expanded');
+      continueReading.classList.toggle('expanded', expanded);
+      if (contLabel) contLabel.textContent = expanded ? 'Show less' : 'Continue reading';
+    });
+  }
 
-  // ============ NEWSLETTER ============
-  document.getElementById('newsForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const btn = e.target.querySelector('button');
-    btn.innerHTML = '&#10003;';
-    setTimeout(() => {
-      btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
-    }, 1500);
-  });
+  // ============ NEWSLETTER (both pages) ============
+  const newsForm = document.getElementById('newsForm');
+  if (newsForm) {
+    newsForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button');
+      btn.innerHTML = '&#10003;';
+      setTimeout(() => {
+        btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+      }, 1500);
+    });
+  }
 
-  // ============ HERO BUTTONS ============
-  document.getElementById('watchBtn').addEventListener('click', () => {
-    alert("The Spring/Summer '26 runway film would play here.");
-  });
-  document.getElementById('shopCatwalkBtn').addEventListener('click', () => {
-    document.getElementById('runway').scrollIntoView({ behavior: 'smooth' });
-  });
+  // ============ HERO BUTTONS (index.html only) ============
+  const watchBtn = document.getElementById('watchBtn');
+  const shopCatwalkBtn = document.getElementById('shopCatwalkBtn');
+  if (watchBtn) {
+    watchBtn.addEventListener('click', () => {
+      alert("The Spring/Summer '26 runway film would play here.");
+    });
+  }
+  if (shopCatwalkBtn) {
+    shopCatwalkBtn.addEventListener('click', () => {
+      document.getElementById('runway').scrollIntoView({ behavior: 'smooth' });
+    });
+  }
 });
