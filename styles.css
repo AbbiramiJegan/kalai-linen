@@ -45,8 +45,8 @@ header.site-header{
   padding:28px var(--section-pad-x);
 }
 .logo{
-  font-family:'Forum',serif;
-  font-size:28px;
+  font-family:'Playfair Display',serif;
+  font-size:23px;
   letter-spacing:0.14em;
   color:#fff;
   font-weight:600;
@@ -1100,8 +1100,8 @@ nav.main-nav a.current{opacity:1;text-decoration:underline;text-underline-offset
 .lifestyle-banner img{width:100%;height:100%;object-fit:cover;object-position:50% 38%;}
 
 @media (max-width:720px){
-  .story-hero{height:78vh;}
-  .lifestyle-banner{height:60vh;}
+  .story-hero{min-height:160px;max-height:340px;}
+  .lifestyle-banner{min-height:140px;max-height:300px;}
   .values-section,.materials-section{padding:72px 0;}
   .quote-banner{padding:88px 0;}
 }
@@ -1316,3 +1316,51 @@ nav.main-nav a.current{opacity:1;text-decoration:underline;text-underline-offset
   .brandstory-section,.proof-section,.journal-section,.letter-section{padding:64px 0;}
   .campaign-banner{height:64vh;}
 }
+
+/* ================================================================
+   OUR STORY — Sustainability proof list ("Made With Consideration")
+   Brief §07: proof, not decoration — a structured list, not a manifesto.
+   ================================================================ */
+.proof-list-section{background:var(--white);padding:100px 0;}
+.proof-list-head{max-width:640px;margin-bottom:50px;}
+.proof-list-head p{font-size:15px;line-height:1.75;color:var(--ink-soft);margin-top:16px;}
+.proof-list{border-top:1px solid var(--line);}
+.proof-row{
+  display:grid;
+  grid-template-columns:220px 1fr;
+  gap:40px;
+  padding:30px 0;
+  border-bottom:1px solid var(--line);
+  opacity:0;
+  transform:translateY(20px);
+  transition:opacity .7s cubic-bezier(0.25,1,0.5,1), transform .7s cubic-bezier(0.25,1,0.5,1);
+}
+.proof-row.in-view{opacity:1;transform:translateY(0);}
+.proof-row-label{
+  font-family:'Playfair Display',serif;
+  font-size:19px;
+  letter-spacing:0.02em;
+  color:var(--ink);
+}
+.proof-row-text{font-size:14.5px;line-height:1.7;color:var(--ink-soft);max-width:540px;}
+@media (max-width:700px){
+  .proof-row{grid-template-columns:1fr;gap:8px;padding:24px 0;}
+}
+
+/* ---- Wellness philosophy trio intro line (reused values-section header) ---- */
+.wardrobe-lede{max-width:620px;margin-bottom:8px;}
+
+/* ---- Continued narrative body copy after the drop-cap opening ---- */
+.story-body{background:var(--white);padding:72px 0 88px;}
+.story-body .section-inner{max-width:760px;}
+.story-body p{
+  font-size:16px;
+  line-height:1.85;
+  color:var(--ink-soft);
+  margin-bottom:22px;
+  opacity:0;
+  transform:translateY(18px);
+  transition:opacity .8s cubic-bezier(0.25,1,0.5,1), transform .8s cubic-bezier(0.25,1,0.5,1);
+}
+.story-body p.in-view{opacity:1;transform:translateY(0);}
+.story-body p:nth-child(2).in-view{transition-delay:.08s;}

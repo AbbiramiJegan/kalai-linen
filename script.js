@@ -47,7 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const revealEls = document.querySelectorAll(
     '.section-head, .fabric-hero, .found-card, ' +
     '.story-intro .intro-block, .value-card, .materials-grid, .quote-banner blockquote, .lifestyle-banner, ' +
-    '.product-card, .life-tile, .why-card, .campaign-banner, .brandstory-grid, .proof-card, .journal-card'
+    '.product-card, .life-tile, .why-card, .campaign-banner, .brandstory-grid, .proof-card, .journal-card, ' +
+    '.proof-row, .story-body p'
   );
   if (revealEls.length) {
     if ('IntersectionObserver' in window) {
