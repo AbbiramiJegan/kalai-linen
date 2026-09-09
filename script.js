@@ -48,7 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
     '.section-head, .fabric-hero, .found-card, ' +
     '.story-intro .intro-block, .value-card, .materials-grid, .quote-banner blockquote, .lifestyle-banner, ' +
     '.product-card, .life-tile, .why-card, .campaign-banner, .brandstory-grid, .proof-card, .journal-card, ' +
-    '.proof-row, .story-body p'
+    '.proof-row, .story-body p, ' +
+    '.journal-featured, .article-hero-pair, .article-body p, .article-body li, .article-pullquote, .article-author'
   );
   if (revealEls.length) {
     if ('IntersectionObserver' in window) {
@@ -238,6 +239,23 @@ document.addEventListener('DOMContentLoaded', () => {
       const expanded = fabricMore.classList.toggle('expanded');
       continueReading.classList.toggle('expanded', expanded);
       if (contLabel) contLabel.textContent = expanded ? 'Show less' : 'Continue reading';
+    });
+  }
+
+  // ============ JOURNAL — cluster filter tabs (hub page only) ============
+  const filterBar = document.querySelector('.journal-filters');
+  if (filterBar) {
+    const cards = document.querySelectorAll('.journal-editorial-grid .journal-card');
+    filterBar.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBar.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const cluster = btn.dataset.cluster;
+        cards.forEach(card => {
+          const match = cluster === 'all' || card.dataset.cluster === cluster;
+          card.style.display = match ? '' : 'none';
+        });
+      });
     });
   }
 
