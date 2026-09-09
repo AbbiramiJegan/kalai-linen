@@ -44,7 +44,11 @@ document.addEventListener('DOMContentLoaded', () => {
   mobileNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileNav.classList.remove('open')));
 
   // ============ SCROLL-TRIGGERED SECTION REVEALS ============
-  const revealEls = document.querySelectorAll('.section-head, .fabric-hero, .found-card');
+  const revealEls = document.querySelectorAll(
+    '.section-head, .fabric-hero, .found-card, ' +
+    '.story-intro .intro-block, .value-card, .materials-grid, .quote-banner blockquote, .lifestyle-banner, ' +
+    '.product-card, .life-tile, .why-card, .campaign-banner, .brandstory-grid, .proof-card, .journal-card'
+  );
   if (revealEls.length) {
     if ('IntersectionObserver' in window) {
       const revealObserver = new IntersectionObserver((entries) => {
@@ -62,7 +66,79 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ============ INFINITE CAROUSEL (only on pages that have it) ============
+  // ============ QUICK VIEW / QUICK ADD popover (shared by product grid + any look carousel) ============
+  const quickAdd = document.getElementById('quickAdd');
+  const qaClose = document.getElementById('qaClose');
+  const qaTitle = document.getElementById('qaTitle');
+  const qaItems = document.getElementById('qaItems');
+
+  function openQuickPanel(title, items) {
+    if (!quickAdd || !qaItems) return;
+    qaTitle.textContent = title;
+    qaItems.innerHTML = '';
+
+    items.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'qa-item';
+
+      const sizesHtml = item.sizes.map((s, i) =>
+        `<button${i === item.sel ? ' class="sel"' : ''}>${s}</button>`
+      ).join('');
+
+      const thumbStyle = item.img
+        ? `background-image:url('${item.img}');background-size:cover;background-position:center;`
+        : `background:${item.color || '#cfc7b8'};`;
+
+      row.innerHTML = `
+        <div class="qa-thumb" style="${thumbStyle}"></div>
+        <div class="qa-info">
+          <div class="qa-name">${item.name} | ${item.price}</div>
+          <div class="qa-sizes">${sizesHtml}</div>
+          <button class="qa-add">${item.cta || 'Quick Add'}</button>
+        </div>`;
+      qaItems.appendChild(row);
+    });
+
+    qaItems.querySelectorAll('.qa-sizes').forEach(group => {
+      group.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          group.querySelectorAll('button').forEach(b => b.classList.remove('sel'));
+          btn.classList.add('sel');
+        });
+      });
+    });
+    qaItems.querySelectorAll('.qa-add').forEach(btn => {
+      btn.addEventListener('click', () => {
+        cartCount++;
+        cartBadge.textContent = cartCount;
+        cartBadge.classList.remove('bump');
+        void cartBadge.offsetWidth; // force reflow so the animation can retrigger
+        cartBadge.classList.add('bump');
+        const original = btn.textContent;
+        btn.textContent = 'Added to Bag';
+        setTimeout(() => { btn.textContent = original; }, 1200);
+      });
+    });
+
+    quickAdd.classList.add('open');
+  }
+  if (qaClose) qaClose.addEventListener('click', () => quickAdd.classList.remove('open'));
+
+  // ---- Product grid "Quick View" (THE KALAI EDIT) ----
+  document.querySelectorAll('.product-card').forEach(card => {
+    const btn = card.querySelector('.qv-btn');
+    if (!btn) return;
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const name = card.dataset.name;
+      const price = card.dataset.price;
+      const img = card.querySelector('img')?.getAttribute('src');
+      const sizes = ['XS', 'S', 'M', 'L', 'XL'];
+      openQuickPanel('Quick View', [{ name, price, img, sizes, sel: 2, cta: 'Add to Bag' }]);
+    });
+  });
+
+  // ============ INFINITE CAROUSEL (only on pages that still use a look carousel) ============
   const track = document.getElementById('carouselTrack');
   const prevArrow = document.getElementById('prevArrow');
   const nextArrow = document.getElementById('nextArrow');
@@ -139,59 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ============ QUICK ADD (per-look, populated dynamically) ============
-  const quickAdd = document.getElementById('quickAdd');
-  const qaClose = document.getElementById('qaClose');
-  const qaTitle = document.getElementById('qaTitle');
-  const qaItems = document.getElementById('qaItems');
-
-  function renderQuickAdd(lookIndex) {
-    const look = LOOKS[lookIndex] || LOOKS[0];
-    qaTitle.textContent = `Shop ${look.label}`;
-    qaItems.innerHTML = '';
-
-    look.items.forEach(item => {
-      const row = document.createElement('div');
-      row.className = 'qa-item';
-
-      const sizesHtml = item.sizes.map((s, i) =>
-        `<button${i === item.sel ? ' class="sel"' : ''}>${s}</button>`
-      ).join('');
-
-      row.innerHTML = `
-        <div class="qa-thumb" style="background:${item.color}"></div>
-        <div class="qa-info">
-          <div class="qa-name">${item.name} | ${item.price}</div>
-          <div class="qa-sizes">${sizesHtml}</div>
-          <button class="qa-add">Quick Add</button>
-        </div>`;
-      qaItems.appendChild(row);
-    });
-
-    // Wire up size selection + add-to-cart for this render
-    qaItems.querySelectorAll('.qa-sizes').forEach(group => {
-      group.querySelectorAll('button').forEach(btn => {
-        btn.addEventListener('click', () => {
-          group.querySelectorAll('button').forEach(b => b.classList.remove('sel'));
-          btn.classList.add('sel');
-        });
-      });
-    });
-    qaItems.querySelectorAll('.qa-add').forEach(btn => {
-      btn.addEventListener('click', () => {
-        cartCount++;
-        cartBadge.textContent = cartCount;
-        // Tactile "bump" feedback — restart the animation even on rapid repeat clicks
-        cartBadge.classList.remove('bump');
-        void cartBadge.offsetWidth; // force reflow so the animation can retrigger
-        cartBadge.classList.add('bump');
-        const original = btn.textContent;
-        btn.textContent = 'Added';
-        setTimeout(() => { btn.textContent = original; }, 1200);
-      });
-    });
-  }
-
   // Delegated click so it works on cloned cards too
   track.addEventListener('click', (e) => {
     const hotspot = e.target.closest('.look-hotspot');
@@ -199,12 +222,10 @@ document.addEventListener('DOMContentLoaded', () => {
     e.stopPropagation();
     const card = hotspot.closest('.look-card');
     const lookIndex = parseInt(card.dataset.look, 10) || 0;
-    renderQuickAdd(lookIndex);
-    quickAdd.classList.add('open');
+    const look = LOOKS[lookIndex] || LOOKS[0];
+    openQuickPanel(`Shop ${look.label}`, look.items);
   });
-
-  qaClose.addEventListener('click', () => quickAdd.classList.remove('open'));
-  } // end infinite carousel + quick add (index.html only)
+  } // end infinite carousel (only present on pages that still use it)
 
   // ============ FABRIC POETRY — SMOOTH ACCORDION EXPANSION (index.html only) ============
   const continueReading = document.getElementById('continueReading');
@@ -219,10 +240,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ============ NEWSLETTER (both pages) ============
-  const newsForm = document.getElementById('newsForm');
-  if (newsForm) {
-    newsForm.addEventListener('submit', (e) => {
+  // ============ NEWSLETTER (any/all forms on the page — footer + dedicated Letter section) ============
+  document.querySelectorAll('.newsletter-form').forEach(form => {
+    form.addEventListener('submit', (e) => {
       e.preventDefault();
       const btn = e.target.querySelector('button');
       btn.innerHTML = '&#10003;';
@@ -230,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
       }, 1500);
     });
-  }
+  });
 
   // ============ HERO BUTTONS (index.html only) ============
   const watchBtn = document.getElementById('watchBtn');
