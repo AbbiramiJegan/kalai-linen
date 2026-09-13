@@ -259,6 +259,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ============ FAQ ACCORDION (click to expand/collapse) ============
+  document.querySelectorAll('.faq-item .faq-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const isOpen = item.classList.toggle('open');
+      btn.setAttribute('aria-expanded', String(isOpen));
+    });
+  });
+
+  // ============ CONTACT FORM ============
+  const contactForm = document.getElementById('contactForm');
+  const contactSuccess = document.getElementById('contactSuccess');
+  if (contactForm) {
+    contactForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      contactForm.style.display = 'none';
+      if (contactSuccess) contactSuccess.classList.add('show');
+    });
+  }
+
   // ============ NEWSLETTER (any/all forms on the page — footer + dedicated Letter section) ============
   document.querySelectorAll('.newsletter-form').forEach(form => {
     form.addEventListener('submit', (e) => {
